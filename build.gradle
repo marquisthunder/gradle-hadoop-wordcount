@@ -1,12 +1,33 @@
 apply plugin: 'java'
-apply plugin: 'eclipse'
+apply plugin: 'idea'
 apply plugin: 'application'
 
 mainClassName = "idv.popcorny.WordCount"
 
 repositories {
-    mavenCentral();
+    flatDir(dirs: file("lib"), name: 'transwarp')
+        mavenCentral()
+//        jcenter()
 }
+
+dependencies {
+    compile ':guava:14.0.1'
+    compile ':hadoop-common:2.5.2-transwarp'
+    compile ':hbase-client:0.98.6-transwarp'
+    compile ':hbase-common:0.98.6-transwarp'
+    compile ':hbase-hadoop2-compat:0.98.6-transwarp'
+    compile ':hive-common:0.12.0-transwarp-tdh40'
+    compile ':hive-exec:0.12.0-transwarp-tdh40'
+    compile ':protobuf-java:2.5.0'
+    compile ':zookeeper:3.4.5-transwarp'
+    compile 'org.apache.hadoop:hadoop-client:2.5.2'
+//        classpath 'org.codehaus.groovy:groovy-backports-compat23:2.3.5'
+//        classpath 'org.zeroturnaround:zt-exec:1.6'
+//        classpath 'me.trnl:clirr-gradle-plugin:0.4'
+//        classpath 'de.undercouch:gradle-download-task:1.0'
+//        classpath 'com.github.ben-manes:gradle-versions-plugin:0.6'
+}
+
 
 jar {
     manifest {
@@ -14,17 +35,13 @@ jar {
     }
 }
 
-dependencies {
-    compile 'org.apache.hadoop:hadoop-client:2.3.0'
-}
 
 task hadoop(dependsOn: jar, type: Exec) {
     if (System.properties['os.name'].toLowerCase().contains('windows')) {
         project.ext.HADOOP_HOME = "$System.env.HADOOP_HOME".replaceAll('\\\\', '/')
         project.ext.HADOOP_CMD = HADOOP_HOME + '/bin/hadoop.cmd'
         commandLine 'cmd', '/c', HADOOP_CMD, 'jar', "$jar.archivePath"
-    } 
-    else {
+    } else {
         project.ext.HADOOP_HOME = "/usr/lib/hadoop"
         project.ext.HADOOP_CMD = HADOOP_HOME + '/bin/hadoop'
         commandLine HADOOP_CMD, 'jar', "$jar.archivePath"
@@ -32,11 +49,11 @@ task hadoop(dependsOn: jar, type: Exec) {
 
     if (project.hasProperty('args')) {
         args project.args.split('\\s+')
-        args.each { commandLine.push(it) }      
+        args.each { commandLine.push(it) }
     }
 
     standardOutput = new ByteArrayOutputStream()
-    
+
     project.ext.output = {
         return standardOutput.toString()
     }
