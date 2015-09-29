@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'application'
 
-mainClassName = "idv.popcorny.WordCount"
+mainClassName = "com.datafinances.sort.MyJob"
 
 repositories {
     flatDir(dirs: file("lib"), name: 'transwarp')
